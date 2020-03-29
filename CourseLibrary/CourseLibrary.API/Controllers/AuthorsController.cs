@@ -19,7 +19,7 @@ namespace CourseLibrary.API.Controllers
         }
 
         [HttpGet()]
-        public IActionResult GetAuthors()
+        public ActionResult<IEnumerable<AuthorDto>> GetAuthors()
         {
             var authorsFromRepo = _courseLibraryRepository.GetAuthors();
             var authors = new List<AuthorDto>();
@@ -39,16 +39,22 @@ namespace CourseLibrary.API.Controllers
         }
 
         [HttpGet("{authorId:guid}")]
-        public IActionResult GetAuthor(Guid authorId)
+        public ActionResult<AuthorDto> GetAuthor(Guid authorId)
         {
-            var authorFromRepo = _courseLibraryRepository.GetAuthor(authorId);
+            var author = _courseLibraryRepository.GetAuthor(authorId);
 
-            if (authorFromRepo == null)
+            if (author == null)
             {
                 return NotFound();
             }
 
-            return Ok(authorFromRepo);
+            return Ok(new AuthorDto
+            {
+                Id = author.Id,
+                Name = $"{author.FirstName} {author.LastName}",
+                MainCategory = author.MainCategory,
+                Age = author.DateOfBirth.GetCurrentAge()
+            });
         }
     }
 }
