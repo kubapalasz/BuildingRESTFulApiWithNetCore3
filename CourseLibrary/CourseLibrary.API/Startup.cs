@@ -51,11 +51,11 @@ namespace CourseLibrary.API
             {
                 app.UseExceptionHandler(appBuilder => 
                 {
-                    appBuilder.Run(async context => 
+                    appBuilder.Run(async context =>
                     {
                         context.Response.StatusCode = 500;
                         await context.Response.WriteAsync("Who happen?");
-                    })
+                    });
                 });
             }
 

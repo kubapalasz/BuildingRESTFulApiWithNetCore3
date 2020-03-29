@@ -21,9 +21,10 @@ namespace CourseLibrary.API.Controllers
         [HttpGet()]
         [HttpHead]
         public ActionResult<IEnumerable<AuthorDto>> GetAuthors(
-            [FromQuery] string mainCategory)
+            [FromQuery] string mainCategory,
+            [FromQuery] string searchQuery)
         {
-            var authorsFromRepo = _courseLibraryRepository.GetAuthors(mainCategory);
+            var authorsFromRepo = _courseLibraryRepository.GetAuthors(mainCategory, searchQuery);
             var authors = new List<AuthorDto>();
 
             foreach (var author in authorsFromRepo)
