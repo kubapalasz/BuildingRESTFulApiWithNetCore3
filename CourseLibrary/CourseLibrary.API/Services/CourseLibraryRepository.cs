@@ -1,5 +1,6 @@
 ﻿using CourseLibrary.API.DbContexts;
-using CourseLibrary.API.Entities; 
+using CourseLibrary.API.Entities;
+using CourseLibrary.API.ResourceParameters;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -122,29 +123,28 @@ namespace CourseLibrary.API.Services
             return _context.Authors.ToList<Author>();
         }
 
-        public IEnumerable<Author> GetAuthors(string mainCategory,
-            string searchQuery)
+        public IEnumerable<Author> GetAuthors(AuthorsResourceParameters authorsResourceParameters)
         {
-            if (string.IsNullOrEmpty(mainCategory) && string.IsNullOrEmpty(searchQuery))
+            if (string.IsNullOrEmpty(authorsResourceParameters.MainCategory) && string.IsNullOrEmpty(authorsResourceParameters.SearchQuery))
             {
                 return GetAuthors();
             }
 
             var collection = _context.Authors as IQueryable<Author>;
 
-            if (!string.IsNullOrEmpty(mainCategory))
+            if (!string.IsNullOrEmpty(authorsResourceParameters.MainCategory))
             {
-                mainCategory = mainCategory.Trim();
-                collection = collection.Where(x => x.MainCategory == mainCategory);
+                authorsResourceParameters.MainCategory = authorsResourceParameters.MainCategory.Trim();
+                collection = collection.Where(x => x.MainCategory == authorsResourceParameters.MainCategory);
             }
 
-            if (!string.IsNullOrEmpty(searchQuery))
+            if (!string.IsNullOrEmpty(authorsResourceParameters.SearchQuery))
             {
-                searchQuery = searchQuery.Trim();
+                authorsResourceParameters.SearchQuery = authorsResourceParameters.SearchQuery.Trim();
                 collection = collection
-                    .Where(x => x.MainCategory.Contains(searchQuery)
-                    || x.FirstName.Contains(searchQuery)
-                    || x.LastName.Contains(searchQuery));
+                    .Where(x => x.MainCategory.Contains(authorsResourceParameters.SearchQuery)
+                    || x.FirstName.Contains(authorsResourceParameters.SearchQuery)
+                    || x.LastName.Contains(authorsResourceParameters.SearchQuery));
             }
 
             return collection.ToList();
