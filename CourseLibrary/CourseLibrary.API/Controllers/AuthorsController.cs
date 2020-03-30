@@ -41,7 +41,7 @@ namespace CourseLibrary.API.Controllers
             return Ok(authors);
         }
 
-        [HttpGet("{authorId:guid}")]
+        [HttpGet("{authorId:guid}", Name = "GetAuthor")]
         public ActionResult<AuthorDto> GetAuthor(Guid authorId)
         {
             var author = _courseLibraryRepository.GetAuthor(authorId);
@@ -58,6 +58,39 @@ namespace CourseLibrary.API.Controllers
                 MainCategory = author.MainCategory,
                 Age = author.DateOfBirth.GetCurrentAge()
             });
+        }
+
+        [HttpPost]
+        public ActionResult<AuthorDto> CreateAuthor(AuthorForCreationDto author) // automatically from body
+        {
+            // We do have ApiController attribute so bad request will be automatically returned
+            //if (author == null)
+            //{
+            //    return BadRequest();
+            //}
+            var authorEntity = new Entities.Author
+            {
+                FirstName = author.FirstName,
+                LastName = author.LastName,
+                DateOfBirth = author.DateOfBirth,
+                MainCategory = author.MainCategory
+            };
+
+            _courseLibraryRepository.AddAuthor(authorEntity);
+            _courseLibraryRepository.Save();
+
+            var authorToReturn = new AuthorDto
+            {
+                Id = authorEntity.Id,
+                Name = $"{authorEntity.FirstName} {authorEntity.LastName}",
+                MainCategory = authorEntity.MainCategory,
+                Age = authorEntity.DateOfBirth.GetCurrentAge()
+            };
+
+            return CreatedAtRoute(
+                "GetAuthor",
+                new { authorId = authorToReturn.Id },
+                authorToReturn);
         }
     }
 }
