@@ -5,6 +5,7 @@ using CourseLibrary.API.Services;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace CourseLibrary.API.Controllers
 {
@@ -73,7 +74,12 @@ namespace CourseLibrary.API.Controllers
                 FirstName = author.FirstName,
                 LastName = author.LastName,
                 DateOfBirth = author.DateOfBirth,
-                MainCategory = author.MainCategory
+                MainCategory = author.MainCategory,
+                Courses = author.Courses.Select(x => new Entities.Course
+                {
+                    Title = x.Title,
+                    Description = x.Description
+                }).ToList()
             };
 
             _courseLibraryRepository.AddAuthor(authorEntity);
