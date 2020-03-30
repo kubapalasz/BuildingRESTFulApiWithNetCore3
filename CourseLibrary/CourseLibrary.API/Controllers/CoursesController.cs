@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace CourseLibrary.API.Controllers
 {
@@ -37,7 +36,7 @@ namespace CourseLibrary.API.Controllers
             }));
         }
 
-        [HttpGet("{courseId:guid}")]
+        [HttpGet("{courseId:guid}", Name = "GetCourseForAuthor")]
         public ActionResult<CourseDto> GetCourseForAuthor(Guid authorId, Guid courseId)
         {
             if (!_courseLibraryRepository.AuthorExists(authorId))
@@ -47,7 +46,7 @@ namespace CourseLibrary.API.Controllers
 
             var course = _courseLibraryRepository.GetCourse(authorId, courseId);
 
-            if(course == null)
+            if (course == null)
             {
                 return NotFound();
             }
@@ -59,6 +58,43 @@ namespace CourseLibrary.API.Controllers
                 Id = course.Id,
                 Title = course.Title
             });
+        }
+
+        [HttpPost]
+        public ActionResult<CourseDto> CreateCourseForAuthor(
+            Guid authorId,
+            CourseForCreationDto courseForCreationDto)
+        {
+            if (!_courseLibraryRepository.AuthorExists(authorId))
+            {
+                return NotFound();
+            }
+
+            var courseEntity = new Entities.Course
+            {
+                Title = courseForCreationDto.Title,
+                Description = courseForCreationDto.Description
+            };
+
+            _courseLibraryRepository.AddCourse(authorId, courseEntity);
+            _courseLibraryRepository.Save();
+
+            var courseToReturn = new CourseDto
+            {
+                Id = courseEntity.Id,
+                AuthorId = courseEntity.AuthorId,
+                Description = courseEntity.Description,
+                Title = courseEntity.Title
+            };
+
+            return CreatedAtRoute(
+                "GetCourseForAuthor",
+                new
+                {
+                    authorId,
+                    courseId = courseToReturn.Id
+                },
+                courseToReturn);
         }
     }
 }
