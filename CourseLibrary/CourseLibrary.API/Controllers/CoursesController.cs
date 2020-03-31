@@ -96,5 +96,45 @@ namespace CourseLibrary.API.Controllers
                 },
                 courseToReturn);
         }
+
+        [HttpPut("{courseId}")]
+        public ActionResult UpdateCourseForAuthor(Guid authorId, 
+            Guid courseId,
+            CourseForUpdateDto course)
+        {
+            if (!_courseLibraryRepository.AuthorExists(authorId))
+            {
+                return NotFound();
+            }
+
+            var courseForAuthorFromRepo = _courseLibraryRepository.GetCourse(authorId, courseId);
+
+            if (courseForAuthorFromRepo == null)
+            {
+                return NotFound();
+            }
+
+            // map entity to a CourseForUpdateDto
+            var mappedEntity = new CourseForUpdateDto
+            {
+                Title = courseForAuthorFromRepo.Title,
+                Description = courseForAuthorFromRepo.Description
+            };
+
+            // apply the updated field values to that dto
+            mappedEntity.Title = course.Title;
+            mappedEntity.Description = course.Description;
+
+            // map the CourseForUpdateDto back to entity
+            courseForAuthorFromRepo.Title = mappedEntity.Title;
+            courseForAuthorFromRepo.Description = mappedEntity.Description;
+
+            _courseLibraryRepository.UpdateCourse(courseForAuthorFromRepo);
+
+            _courseLibraryRepository.Save();
+
+
+            return NoContent();
+        }
     }
 }
