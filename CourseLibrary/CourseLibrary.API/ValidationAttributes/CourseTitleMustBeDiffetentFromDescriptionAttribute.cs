@@ -13,7 +13,8 @@ namespace CourseLibrary.API.ValidationAttributes
             if (course.Title == course.Description)
             {
                 return new ValidationResult(
-                    $"{nameof(course.Title)} should be different from {nameof(course.Description)}",
+                    ErrorMessage,
+                    //$"{nameof(course.Title)} should be different from {nameof(course.Description)}",
                     new[] { nameof(CourseForCreationDto) });
             }
 

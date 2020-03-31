@@ -5,10 +5,10 @@ using System.ComponentModel.DataAnnotations;
 namespace CourseLibrary.API.Models
 {
     /*Custom attributes are executed before Validate method gets called*/
-    [CourseTitleMustBeDiffetentFromDescriptionAttribute]
+    [CourseTitleMustBeDiffetentFromDescription(ErrorMessage = " ;-) Custom error message - CourseTitleMustBeDiffetentFromDescription")]
     public class CourseForCreationDto //: IValidatableObject
     {
-        [Required]
+        [Required(ErrorMessage = " ;-) Custom error message - Required")]
         [MaxLength(100)]
         public string Title { get; set; }
 
