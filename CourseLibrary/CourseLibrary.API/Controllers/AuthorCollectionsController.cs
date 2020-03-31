@@ -8,6 +8,7 @@ using System.Linq;
 
 namespace CourseLibrary.API.Controllers
 {
+    /*Automatically returns 400 on validation errors - and affect model state dictionary*/
     [ApiController]
     [Route("api/authorcollections")]
     public class AuthorCollectionsController : ControllerBase
