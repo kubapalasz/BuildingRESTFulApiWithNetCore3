@@ -184,8 +184,12 @@ namespace CourseLibrary.API.Controllers
             if (courseForAuthorFromRepo == null)
             {
                 var courseDto = new CourseForUpdateDto();
-                pathDocument.ApplyTo(courseDto);
+                pathDocument.ApplyTo(courseDto, ModelState);
 
+                if (!TryValidateModel(courseDto))
+                {
+                    return ValidationProblem(ModelState);
+                }
 
                 var newCourseEntity = new Course
                 {
@@ -249,6 +253,27 @@ namespace CourseLibrary.API.Controllers
             _courseLibraryRepository.UpdateCourse(courseForAuthorFromRepo);
 
             _courseLibraryRepository.Save();
+            return NoContent();
+        }
+
+        [HttpDelete("{courseId}")]
+        public ActionResult DeleteCourseForAuthor(Guid authorId, Guid courseId)
+        {
+            if (!_courseLibraryRepository.AuthorExists(authorId))
+            {
+                return NotFound();
+            }
+
+            var courseForAuthorFromRepo = _courseLibraryRepository.GetCourse(authorId, courseId);
+
+            if (courseForAuthorFromRepo == null)
+            {
+                return NotFound();
+            }
+
+            _courseLibraryRepository.DeleteCourse(courseForAuthorFromRepo);
+            _courseLibraryRepository.Save();
+
             return NoContent();
         }
 
