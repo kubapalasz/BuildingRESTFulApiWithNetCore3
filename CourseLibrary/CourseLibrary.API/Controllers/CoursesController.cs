@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using CourseLibrary.API.Entities;
 
 namespace CourseLibrary.API.Controllers
 {
@@ -98,7 +99,7 @@ namespace CourseLibrary.API.Controllers
         }
 
         [HttpPut("{courseId}")]
-        public ActionResult UpdateCourseForAuthor(Guid authorId, 
+        public IActionResult UpdateCourseForAuthor(Guid authorId, 
             Guid courseId,
             CourseForUpdateDto course)
         {
@@ -111,7 +112,33 @@ namespace CourseLibrary.API.Controllers
 
             if (courseForAuthorFromRepo == null)
             {
-                return NotFound();
+                var newCourseEntity = new Course
+                {
+                    Title = course.Title,
+                    Description = course.Description,
+                    Id = courseId
+                };
+
+                _courseLibraryRepository.AddCourse(authorId, newCourseEntity);
+
+                _courseLibraryRepository.Save();
+
+                var courseToReturn = new CourseDto
+                {
+                    AuthorId = newCourseEntity.AuthorId,
+                    Title = newCourseEntity.Title,
+                    Description = newCourseEntity.Description,
+                    Id = newCourseEntity.Id
+                };
+
+                return CreatedAtRoute(
+                    "GetCourseForAuthor",
+                    new
+                    {
+                        authorId = authorId,
+                        courseId = courseToReturn.Id
+                    },
+                    courseToReturn);
             }
 
             // map entity to a CourseForUpdateDto
