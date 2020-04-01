@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using CourseLibrary.API.Entities;
+using Microsoft.AspNetCore.JsonPatch;
 
 namespace CourseLibrary.API.Controllers
 {
@@ -161,6 +162,54 @@ namespace CourseLibrary.API.Controllers
             _courseLibraryRepository.Save();
 
 
+            return NoContent();
+        }
+
+        [HttpPatch("{courseId}")]
+        public IActionResult PartiallyUpdateCourseForAuthor(Guid authorId,
+            Guid courseId,
+            JsonPatchDocument<CourseForUpdateDto> pathDocument)
+        {
+            if (!_courseLibraryRepository.AuthorExists(authorId))
+            {
+                return NotFound();
+            }
+
+            var courseForAuthorFromRepo = _courseLibraryRepository.GetCourse(authorId, courseId);
+
+            if (courseForAuthorFromRepo == null)
+            {
+                return NotFound();
+            }
+
+            var courseToPatch = new CourseForUpdateDto
+            {
+                Title = courseForAuthorFromRepo.Title,
+                Description = courseForAuthorFromRepo.Description
+            };
+
+            // TODO - add validation
+            pathDocument.ApplyTo(courseToPatch);
+
+            // BELOW IS REGULAR PATCH CODE
+            // map entity to a CourseForUpdateDto
+            var mappedEntity = new CourseForUpdateDto
+            {
+                Title = courseForAuthorFromRepo.Title,
+                Description = courseForAuthorFromRepo.Description
+            };
+
+            // apply the updated field values to that dto
+            mappedEntity.Title = courseToPatch.Title;
+            mappedEntity.Description = courseToPatch.Description;
+
+            // map the CourseForUpdateDto back to entity
+            courseForAuthorFromRepo.Title = mappedEntity.Title;
+            courseForAuthorFromRepo.Description = mappedEntity.Description;
+
+            _courseLibraryRepository.UpdateCourse(courseForAuthorFromRepo);
+
+            _courseLibraryRepository.Save();
             return NoContent();
         }
     }
