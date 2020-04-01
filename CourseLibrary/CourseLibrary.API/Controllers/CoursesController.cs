@@ -6,6 +6,10 @@ using System.Collections.Generic;
 using System.Linq;
 using CourseLibrary.API.Entities;
 using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace CourseLibrary.API.Controllers
 {
@@ -72,7 +76,7 @@ namespace CourseLibrary.API.Controllers
                 return NotFound();
             }
 
-            var courseEntity = new Entities.Course
+            var courseEntity = new Course
             {
                 Title = courseForCreationDto.Title,
                 Description = courseForCreationDto.Description
@@ -189,7 +193,12 @@ namespace CourseLibrary.API.Controllers
             };
 
             // TODO - add validation
-            pathDocument.ApplyTo(courseToPatch);
+            pathDocument.ApplyTo(courseToPatch, ModelState);
+
+            if (!TryValidateModel(courseToPatch))
+            {
+                return ValidationProblem(ModelState);
+            }
 
             // BELOW IS REGULAR PATCH CODE
             // map entity to a CourseForUpdateDto
@@ -211,6 +220,14 @@ namespace CourseLibrary.API.Controllers
 
             _courseLibraryRepository.Save();
             return NoContent();
+        }
+
+        public override ActionResult ValidationProblem(
+            [ActionResultObjectValue] ModelStateDictionary modelStateDictionary)
+        {
+            var options = HttpContext.RequestServices
+                .GetRequiredService<IOptions<ApiBehaviorOptions>>();
+            return (ActionResult)options.Value.InvalidModelStateResponseFactory(ControllerContext);
         }
     }
 }
