@@ -183,7 +183,37 @@ namespace CourseLibrary.API.Controllers
 
             if (courseForAuthorFromRepo == null)
             {
-                return NotFound();
+                var courseDto = new CourseForUpdateDto();
+                pathDocument.ApplyTo(courseDto);
+
+
+                var newCourseEntity = new Course
+                {
+                    Title = courseDto.Title,
+                    Description = courseDto.Description,
+                    Id = courseId
+                };
+
+                _courseLibraryRepository.AddCourse(authorId, newCourseEntity);
+
+                _courseLibraryRepository.Save();
+
+                var courseToReturn = new CourseDto
+                {
+                    AuthorId = newCourseEntity.AuthorId,
+                    Title = newCourseEntity.Title,
+                    Description = newCourseEntity.Description,
+                    Id = newCourseEntity.Id
+                };
+
+                return CreatedAtRoute(
+                    "GetCourseForAuthor",
+                    new
+                    {
+                        authorId = authorId,
+                        courseId = courseToReturn.Id
+                    },
+                    courseToReturn);
             }
 
             var courseToPatch = new CourseForUpdateDto
